@@ -6,6 +6,7 @@ import {
     sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "@/Component/firebase";
+import Link from "next/link";
 
 
 const RegisterPage = () => {
@@ -41,13 +42,13 @@ const RegisterPage = () => {
             await sendEmailVerification(user);
 
             // Temporarily store user data in local storage
-            localStorage.setItem(
-                "registrationData", JSON.stringify({
-                    firstName,
-                    lastName,
-                    gender,
-                    email,
-                }));
+            // localStorage.setItem(
+            //     "registrationData", JSON.stringify({
+            //         firstName,
+            //         lastName,
+            //         gender,
+            //         email,
+            //     }));
             setMessage(
                 "Registration successful! Please check your email for verification."
             );
@@ -72,9 +73,9 @@ const RegisterPage = () => {
     <h2 className="text-2xl text-white font-bold text-center mb-10">Register</h2>
     <div className="p-5 border border-gray-300 rounded">
         <form onSubmit={handleRegister} className="space-y-6 px-6 pb-4">
-            <div className="flex flex-wrap -mx-2 space-y-6">
-                <div className="w-full md:w-1/2 px-2">
-                    <label htmlFor="firstName" className="text-sm font-medium text-gray-300 mb-2">First Name</label>
+            <div className="flex flex-wrap -mx-2 space-y-6 ">
+                <div className="w-full md:w-1/2 px-2 mt-6">
+                    <label htmlFor="firstName" className="text-sm font-medium text-gray-300 mb-4">First Name</label>
                     <input
                         type="text"
                         id="firstName"
@@ -153,6 +154,15 @@ const RegisterPage = () => {
             >
                 Sign Up
             </button>
+            
+            <p className="text-sm font-medium text-gray-300 mt-4">
+                     have an account?{" "}
+                    <Link href="/login" className="text-blue-700 hover:underline">
+                        Login here
+                    </Link>
+                </p>
+               
+            
         </form>
     </div>
 </div>

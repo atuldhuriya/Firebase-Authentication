@@ -76,12 +76,20 @@ const LoginPage = () => {
                 <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
                     Log In
                 </button>
-                <p className="text-sm font-medium text-gray-300 mt-4">
-                    Don't have an account?{" "}
+               <div className="flex gap-48">
+               <p className="text-sm font-medium text-gray-300 mt-4">
+                     have an account?{" "}
                     <Link href="/register" className="text-blue-700 hover:underline">
                         Register here
                     </Link>
                 </p>
+                <p className="text-sm font-medium text-gray-300 mt-4">
+                    {" "}
+                    <Link href="/changePasswod" className="text-blue-700 hover:underline">
+                        Forget Your Password
+                    </Link>
+                </p>
+               </div>
             </form>
         </div>
     );

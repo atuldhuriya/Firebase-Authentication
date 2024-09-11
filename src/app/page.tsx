@@ -1,78 +1,172 @@
-// "use client"
-// import React, { useState } from 'react';
-// import { useAuth } from '@/contexts/AuthContext';
-// import { firestore } from '@/Component/firebase';
-// import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
+"use client";
+import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+} from "firebase/auth";
+import { auth } from "@/Component/firebase";
+import Link from "next/link";
 
-// const UpdateProfileForm: React.FC = () => {
-//     const { currentUser } = useAuth(); 
-//     const [firstName, setFirstName] = useState<string>('');
-//     const [lastName, setLastName] = useState<string>('');
-//     const [gender, setGender] = useState<string>('');
 
-//     const handleSubmit = async (event: React.FormEvent) => {
-//         event.preventDefault();
+const RegisterPage = () => {
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [gender, setGender] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
 
-//         try {
-//             // Update profile information
-//             await updateDoc(doc(firestore, 'users', currentUser.uid), {
-//                 firstName,
-//                 lastName,
-//                 gender,
-//             });
-//             alert('Profile updated successfully!');
-//         } catch (error) {
-//             console.error('Error updating profile: ', error);
-//             alert('Failed to update profile. Please try again.');
-//             return; // Exit early on error
-//         }
+    const router = useRouter();
 
-//         // Optional: Delete profile functionality
-//         if (window.confirm('Are you sure you want to delete your profile? This action cannot be undone.')) {
-//             try {
-//                 await deleteDoc(doc(firestore, 'users', currentUser.uid));
-//                 alert('Profile deleted successfully!');
-//                 // Optionally: Redirect or perform logout after deletion
-//             } catch (error) {
-//                 console.error('Error deleting profile: ', error);
-//                 alert('Failed to delete profile. Please try again.');
-//             }
-//         }
+    const handleRegister = async (event: FormEvent) => {
+        event.preventDefault();
+        setError(null);
+        setMessage(null);
 
-//         // Clear form fields after submission (optional)
-//         setFirstName('');
-//         setLastName('');
-//         setGender('');
-//     };
+        if (password !== confirmPassword) {
+            setError("Password do not match");
+            return;
+        }
 
-//     return (
-//         <form onSubmit={handleSubmit}>
-//             <input
-//                 type="text"
-//                 value={firstName}
-//                 onChange={(e) => setFirstName(e.target.value)}
-//                 placeholder="First Name"
-//                 required
-//             />
-//             <input
-//                 type="text"
-//                 value={lastName}
-//                 onChange={(e) => setLastName(e.target.value)}
-//                 placeholder="Last Name"
-//                 required
-//             />
-//             <select value={gender} onChange={(e) => setGender(e.target.value)}>
-//                 <option value="male">Male</option>
-//                 <option value="female">Female</option>
-//                 <option value="other">Other</option>
-//             </select>
-//             <button type="submit">Update Profile</button>
-           
-//             <button onClick={() => {}}>
-//                 Delete Profile
-//             </button>
-//         </form>
-//     );
-// };
+        try {
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+            const user = userCredential.user;
 
-// export default UpdateProfileForm;
+            await sendEmailVerification(user);
+
+            // Temporarily store user data in local storage
+            // localStorage.setItem(
+            //     "registrationData", JSON.stringify({
+            //         firstName,
+            //         lastName,
+            //         gender,
+            //         email,
+            //     }));
+            setMessage(
+                "Registration successful! Please check your email for verification."
+            );
+            setFirstName("");
+            setLastName("");
+            setGender("");
+            setEmail("");
+            setPassword("");
+            setConfirmPassword("");
+        } catch (error) {
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError("An unknown error occurred");
+            }
+        }
+    };
+
+
+    return (
+        <div className="bg-gradient-to-b from-gray-600 to-black justify-center items-center min-h-screen w-screen flex flex-col relative">
+    <h2 className="text-2xl text-white font-bold text-center mb-10">Register</h2>
+    <div className="p-5 border border-gray-300 rounded">
+        <form onSubmit={handleRegister} className="space-y-6 px-6 pb-4">
+            <div className="flex flex-wrap -mx-2 space-y-6 ">
+                <div className="w-full md:w-1/2 px-2 mt-6">
+                    <label htmlFor="firstName" className="text-sm font-medium text-gray-300 mb-4">First Name</label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        className="border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
+                        />
+                </div>
+                <div className="w-full md:w-1/2 px-2">
+                    <label htmlFor="lastName" className="text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                    <input
+                        type="text"
+                        id="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        className="border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
+                    />
+                </div>
+                <div className="w-full md:w-1/2 px-2">
+                    <label htmlFor="gender" className="text-sm font-medium text-gray-300 mb-2">Gender</label>
+                    <select
+                        id="gender"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        required
+                        className="border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
+                    >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div className="w-full md:w-1/2 px-2">
+                    <label htmlFor="email" className="text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
+                    />
+                </div>
+                <div className="w-full md:w-1/2 px-2">
+                    <label htmlFor="password" className="text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
+                    />
+                </div>
+                <div className="w-full md:w-1/2 px-2">
+                    <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        className="border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
+                    />
+                </div>
+                
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {message && <p className="text-green-500 text-sm">{message}</p>}
+            <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+                Sign Up
+            </button>
+            
+            <p className="text-sm font-medium text-gray-300 mt-4">
+                     have an account?{" "}
+                    <Link href="/login" className="text-blue-700 hover:underline">
+                        Login here
+                    </Link>
+                </p>
+               
+            
+        </form>
+    </div>
+</div>
+
+    );
+};
+export default RegisterPage;
